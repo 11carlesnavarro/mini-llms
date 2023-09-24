@@ -2,23 +2,6 @@
 
 This repository contains an implementation of the GPT (Generative Pre-trained Transformer) architecture, notebooks following the "Make More Neural Networks!" series, and data for model training.
 
-## Directory Structure
-.
-├── README.md
-├── data
-│ ├── input.txt
-│ └── names.txt
-├── gpt_karpathy
-│ ├── bigram.py
-│ └── gpt.py
-└── notebooks
-├── GPT_dev.ipynb
-├── build_makemore_mlp.ipynb
-├── build_makemore_mlp2.ipynb
-├── build_makemore_yay.ipynb
-├── makemore_part4_backprop.ipynb
-└── makemore_part5_cnn1.ipynb
-
 ## Data
 Located in the `data` directory, you'll find input data used for model training:
 - `input.txt`: Contains Shakespearean text.
@@ -40,3 +23,7 @@ The `notebooks` directory contains Jupyter notebooks primarily based on the "Mak
 ```bash
 git clone git@github.com:11carlesnavarro/mini-gpt.git
 ```
+
+## Contributing
+While this repository is primarily an educational resource, contributions or suggestions are welcome. Feel free to open an issue or submit a pull request.
+
