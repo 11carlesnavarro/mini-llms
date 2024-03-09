@@ -231,7 +231,7 @@ class Attention(nn.Module):
                     dropout_p = self.dropout if self.training else 0.0,
                     softmax_scale = math.sqrt(self.head_dim),
                     causal=True)
-                output = pad_input(output, indices_q, bsz, seqlen)
+                output = pad_input(output, indices_q, bsz, seqlen).transpose(1,2)
             else:
                 output = flash_attn_func(
                     query_states,
