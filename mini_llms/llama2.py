@@ -213,6 +213,7 @@ class Attention(nn.Module):
             query_states = xq.transpose(1,2)
             key_states = xk.transpose(1,2)
             value_states = xv.transpose(1,2)
+
             if attention_mask is not None:
                 query_states, key_states, value_states, indices_q, cu_seqlens, max_seqlen_in_batch = self._unpad_input(
                     query_states, key_states, value_states, attention_mask, seqlen
@@ -237,7 +238,7 @@ class Attention(nn.Module):
                     key_states,
                     value_states,
                     dropout_p = self.dropout if self.training else 0.0,
-                    causal=False)
+                    causal=True)
                 output = output.transpose(1,2)
 
         elif self.sdpa:
