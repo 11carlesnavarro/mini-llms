@@ -237,7 +237,7 @@ class Attention(nn.Module):
                     key_states,
                     value_states,
                     dropout_p = self.dropout if self.training else 0.0,
-                    causal=True)
+                    causal=False)
                 output = output.transpose(1,2)
 
         elif self.sdpa:
