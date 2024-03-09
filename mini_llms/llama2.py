@@ -229,7 +229,7 @@ class Attention(nn.Module):
                     max_seqlen_q = max_seqlen_in_batch_q,
                     max_seqlen_k = max_seqlen_in_batch_k,
                     dropout_p = self.dropout if self.training else 0.0,
-                    causal=True)
+                    causal=False)
                 output = pad_input(output, indices_q, bsz, seqlen).transpose(1,2)
             else:
                 output = flash_attn_func(
@@ -238,6 +238,7 @@ class Attention(nn.Module):
                     value_states,
                     dropout_p = self.dropout if self.training else 0.0,
                     causal=True)
+                output = output.transpose(1,2)
 
         elif self.sdpa:
             output = torch.nn.functional.scaled_dot_product_attention(
