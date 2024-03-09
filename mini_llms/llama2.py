@@ -229,7 +229,6 @@ class Attention(nn.Module):
                     max_seqlen_q = max_seqlen_in_batch_q,
                     max_seqlen_k = max_seqlen_in_batch_k,
                     dropout_p = self.dropout if self.training else 0.0,
-                    softmax_scale = math.sqrt(self.head_dim),
                     causal=True)
                 output = pad_input(output, indices_q, bsz, seqlen).transpose(1,2)
             else:
