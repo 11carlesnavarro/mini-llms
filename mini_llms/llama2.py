@@ -210,6 +210,7 @@ class Attention(nn.Module):
 
         # flash implementation
         if self.flash:
+            causal = seqlen != 1
             query_states = xq.transpose(1,2)
             key_states = xk.transpose(1,2)
             value_states = xv.transpose(1,2)
@@ -230,16 +231,15 @@ class Attention(nn.Module):
                     max_seqlen_q = max_seqlen_in_batch_q,
                     max_seqlen_k = max_seqlen_in_batch_k,
                     dropout_p = self.dropout if self.training else 0.0,
-                    causal=False)
+                    causal=causal)
                 output = pad_input(output, indices_q, bsz, seqlen).transpose(1,2)
             else:
-                print("WARNING: flash_attention not implemented for non-causal attention")
                 output = flash_attn_func(
                     query_states,
                     key_states,
                     value_states,
                     dropout_p = self.dropout if self.training else 0.0,
-                    causal=False)
+                    causal=causal)
                 output = output.transpose(1,2)
 
         elif self.sdpa:
