@@ -233,12 +233,13 @@ class Attention(nn.Module):
                     causal=False)
                 output = pad_input(output, indices_q, bsz, seqlen).transpose(1,2)
             else:
+                print("WARNING: flash_attention not implemented for non-causal attention")
                 output = flash_attn_func(
                     query_states,
                     key_states,
                     value_states,
                     dropout_p = self.dropout if self.training else 0.0,
-                    causal=True)
+                    causal=False)
                 output = output.transpose(1,2)
 
         elif self.sdpa:
