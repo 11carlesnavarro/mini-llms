@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass
 from typing import Optional, Tuple
+import time
 
 import mlx.core as mx
 import mlx.nn as nn
@@ -174,4 +175,98 @@ class Llama(nn.Module):
 
             yield y
 
+def tic():
+    return time.time()
+
+def toc(msg, start):
+    end = time.time()
+    return f"[INFO] {msg}: {end - start:.3f} s"
+
+def generate(args):
+    input("Press enter to start generation")
+    print("------")
+    print(args.prompt)
+    x = mx.array([[tokenizer.bos_id()] + tokenizer.encode(args.prompt)])
+    skip = 0
+    prompt_processing = None
+    tokens = []
+    start = tic()
+    for token in model.generate(x, args.temp):
+        tokens.append(token)
+
+        if len(tokens) == 1:
+            # Actually perform the computation to measure the prompt processing time
+            mx.eval(token)
+            prompt_processing = toc("Prompt processing", start)
+        if len(tokens) >= args.max_tokens:
+            break
+
+        elif (len(tokens) % args.write_every) == 0:
+            # It is ok to eval things we have already eval-ed.
+            mx.eval(tokens)
+            s = tokenizer.decode([t.item() for t in tokens])
+            print(s[skip:], end="", flush=True)
+            skip = len(s)
+    
+    mx.eval(tokens)
+    full_gen = toc("Full generation", start)
+    s = tokenizer.decode([t.item() for t in tokens])
+    print(s[skip:], flush=True)
+    print("------")
+    print(prompt_processing)
+    print(full_gen)
+
+def few_shot_generate(args):
+    def possible_end(s):
+        word = "[INSTRUCTION]"
+        for i in range(len(word) - 1, 0, -1):
+            if s[-i:] == word[i]:
+                return 0
+        if s[-len(word):] == word:
+            return 1
+        return -1
+    
+    def generate(question):
+        x = mx.array([[tokenizer.bos_id()] + tokenizer.encode(question)])
+        skip = 0
+        prompt_processing = None
+        tokens = []
+        start = tic()
+        for token in model.generate(x, args.temp):
+            tokens.append(token)
+
+            if len(tokens) == 1:
+                # Actually perform the computation to measure the prompt processing time
+                mx.eval(token)
+                prompt_processing = toc("Prompt processing", start)
+            if len(tokens) >= args.max_tokens:
+                break
+
+            mx.eval(tokens)
+            token_list = [t.item() for t in tokens]
+            s = tokenizer.decode(token_list)
+            end = possible_end(s)
+
+            if end == 0:
+                continue
+            if end == 1:
+                skip = len(s)
+                break
+            
+            print(s[skip:], end="", flush=True)
+            skip = len(s)
+            if token_list[-1] == tokenizer.eos_id():
+                break
+
+        mx.eval(tokens)
+        full_gen = toc("Full generation", start)
+        s = tokenizer.decode([t.item() for t in tokens])
+        print(s[skip:], end="", flush=True)
+    
+    print("[INFO] Loading few-shot examples from: {}".format(args.few_shot))
+    prompt = open(args.few_shot).read().strip()
+    while True:
+        question = input("Ask a question: ")
+        generate(prompt.replace("{}", question))
+        print()
 
